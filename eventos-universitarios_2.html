@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eventos Universitarios — UNRaf</title>
+  <meta name="description" content="Registro y consulta de eventos de la Universidad Nacional de Rafaela">
+  <meta name="theme-color" content="#00a79d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul: #1b3a6b;
+      --teal: #00a79d;
+      --teal-h: #008c84;
+      --amarillo: #f5a623;
+      --gris: #6d6e71;
+      --gris-claro: #999;
+      --tx: #1a1a2e;
+      --tx2: #5c5c6e;
+      --bg: #fff;
+      --bg2: #f4f5f7;
+      --brd: #e0e2e8;
+      --r: 6px;
+      --ff: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{font-size:1em;line-height:1.5;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{font-family:var(--ff);background:var(--bg2);color:var(--tx)}
+    img{max-width:100%;vertical-align:middle}
+    ::selection{background:rgba(0,167,157,.15)}
+
+    .wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 1rem}
+    @media(min-width:768px){.wrap{padding:0 2rem}}
+
+    /* HEADER */
+    .hdr{background:var(--bg);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:50}
+    .hdr-in{display:flex;align-items:center;justify-content:space-between;padding:.65rem 0;gap:.75rem}
+    .logo{display:flex;align-items:center;gap:.55rem;text-decoration:none;flex-shrink:0}
+    .logo-svg{width:38px;height:38px}
+    @media(min-width:768px){.logo-svg{width:44px;height:44px}}
+    .logo-txt{display:flex;flex-direction:column;line-height:1.1}
+    .logo-name{font-weight:700;font-size:1.25rem;color:var(--gris);letter-spacing:-.02em}
+    .logo-sub{font-size:.65rem;color:var(--gris-claro);font-weight:400;letter-spacing:.03em;display:none}
+    @media(min-width:600px){.logo-sub{display:block}}
+
+    .tabs{display:flex;gap:0}
+    .tab{padding:.45rem .9rem;font-family:var(--ff);font-size:.85rem;font-weight:600;background:none;border:none;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;white-space:nowrap}
+    .tab:hover{color:var(--tx)}
+    .tab.on{color:var(--teal);border-bottom-color:var(--teal)}
+
+    /* CALENDAR */
+    .cal-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0 .75rem}
+    .cal-title{font-size:1.1rem;font-weight:700;text-transform:capitalize}
+    .cal-nav{display:flex;gap:.25rem}
+    .cal-btn{width:34px;height:34px;border:1px solid var(--brd);border-radius:var(--r);background:var(--bg);color:var(--tx);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+    .cal-btn:hover{border-color:var(--teal)}
+    .cal-btn svg{width:16px;height:16px}
+
+    .filter-row{display:flex;gap:.4rem;flex-wrap:wrap;padding-bottom:.75rem}
+    .chip{padding:.3rem .75rem;font-family:var(--ff);font-size:.75rem;font-weight:600;background:var(--bg);border:1px solid var(--brd);border-radius:16px;color:var(--tx2);cursor:pointer;transition:all .15s}
+    .chip:hover{border-color:var(--teal);color:var(--tx)}
+    .chip.on{border-color:var(--teal);color:var(--teal);background:rgba(0,167,157,.08)}
+
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);background:var(--bg);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+    .cal-day-name{padding:.45rem .25rem;text-align:center;font-size:.7rem;font-weight:600;color:var(--tx2);background:var(--bg2);border-bottom:1px solid var(--brd);letter-spacing:.04em;text-transform:uppercase}
+    .cal-cell{min-height:80px;border-right:1px solid var(--brd);border-bottom:1px solid var(--brd);padding:.3rem;position:relative;cursor:default;transition:background .1s}
+    .cal-cell:nth-child(7n){border-right:none}
+    .cal-cell:hover{background:rgba(0,167,157,.03)}
+    .cal-cell.empty{background:var(--bg2);opacity:.5}
+    .cal-cell.today{background:rgba(0,167,157,.06)}
+    .cal-num{font-size:.75rem;font-weight:600;color:var(--tx2);margin-bottom:.2rem}
+    .cal-cell.today .cal-num{color:var(--teal);font-weight:700}
+    .cal-dot{display:block;font-size:.6rem;padding:.1rem .3rem;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font-weight:500;line-height:1.4;max-width:100%}
+    .cal-dot:hover{filter:brightness(.9)}
+    .dot-deportes{background:rgba(0,167,157,.15);color:var(--teal)}
+    .dot-academico{background:rgba(27,58,107,.12);color:var(--azul)}
+    .dot-culturas{background:rgba(245,166,35,.15);color:#b87a00}
+
+    @media(max-width:600px){
+      .cal-cell{min-height:56px}
+      .cal-dot{font-size:0;padding:4px;border-radius:50%;width:8px;height:8px;margin:1px auto}
+      .cal-day-name{font-size:.6rem;padding:.35rem .1rem}
+    }
+
+    /* EVENT DETAIL MODAL */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .2s}
+    .overlay.open{opacity:1;pointer-events:auto}
+    .modal{background:var(--bg);border-radius:var(--r);max-width:480px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.18);position:relative}
+    .modal-img{width:100%;height:160px;object-fit:cover;border-radius:var(--r) var(--r) 0 0;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--gris-claro);font-size:.8rem}
+    .modal-img img{width:100%;height:160px;object-fit:cover;border-radius:var(--r) var(--r) 0 0}
+    .modal-body{padding:1.25rem}
+    .modal-body h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+    .modal-meta{font-size:.82rem;color:var(--tx2);display:flex;flex-direction:column;gap:.25rem;margin-bottom:.6rem}
+    .modal-meta span{display:flex;align-items:center;gap:.35rem}
+    .modal-desc{font-size:.88rem;color:var(--tx2);line-height:1.5;margin-bottom:.75rem}
+    .modal-cat{display:inline-block;font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:3px}
+    .modal-close{position:absolute;top:.5rem;right:.5rem;width:30px;height:30px;border:none;border-radius:50%;background:rgba(0,0,0,.06);color:var(--tx);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{background:rgba(0,0,0,.12)}
+    .modal-actions{display:flex;gap:.5rem;margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--brd)}
+    .btn-sm{padding:.4rem .8rem;font-family:var(--ff);font-size:.8rem;font-weight:600;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s}
+    .btn-danger{background:rgba(192,57,43,.08);color:#c0392b}
+    .btn-danger:hover{background:rgba(192,57,43,.15)}
+
+    /* FORM */
+    .form-sec{padding:1.25rem 0 3rem}
+    .form-sec h2{font-size:1.1rem;font-weight:700;margin-bottom:1rem}
+    .fg{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;max-width:600px}
+    @media(max-width:520px){.fg{grid-template-columns:1fr}}
+    .fg .full{grid-column:1/-1}
+    .fg label{display:block;font-size:.75rem;font-weight:600;color:var(--tx2);margin-bottom:.25rem;letter-spacing:.02em}
+    .fg input,.fg select,.fg textarea{width:100%;padding:.5rem .7rem;font-family:var(--ff);font-size:16px;color:var(--tx);background:var(--bg);border:1px solid var(--brd);border-radius:var(--r);transition:border-color .15s}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,167,157,.1)}
+    .fg textarea{resize:vertical;min-height:64px}
+    .fg .hint{font-size:.7rem;color:var(--gris-claro);margin-top:.2rem}
+    .btn-p{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.4rem;min-height:44px;font-family:var(--ff);font-size:.9rem;font-weight:600;background:var(--teal);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s}
+    .btn-p:hover{background:var(--teal-h)}
+    .btn-p:active{transform:scale(.97)}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--azul);color:#fff;padding:.6rem 1.2rem;border-radius:var(--r);font-weight:600;font-size:.85rem;opacity:0;transition:transform .3s,opacity .3s;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+    /* FOOTER */
+    .ftr{background:var(--bg);border-top:1px solid var(--brd);padding:1.25rem 0;text-align:center;font-size:.72rem;color:var(--tx2);margin-top:2rem}
+    .ftr a{color:var(--teal);text-decoration:none}
+
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+    @media print{.hdr,.toast,.ftr,.cal-nav,.filter-row,.tabs,.overlay{display:none!important}}
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <a href="#" class="logo" aria-label="UNRaf">
+      <svg class="logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g transform="translate(60,60)">
+          <!-- 6 petals: rounded rects rotated from center -->
+          <!-- Azul 1 — arriba-izquierda -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#1b3a6b" transform="rotate(-55)"/>
+          <!-- Azul 2 — arriba-derecha -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#1b3a6b" transform="rotate(10)"/>
+          <!-- Teal 1 — derecha -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#00a79d" transform="rotate(70)"/>
+          <!-- Teal 2 — izquierda-abajo -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#00a79d" transform="rotate(-115)"/>
+          <!-- Amarillo 1 — abajo-izquierda -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#f5a623" transform="rotate(-175)"/>
+          <!-- Amarillo 2 — abajo-derecha -->
+          <rect x="-5" y="-42" width="10" height="38" rx="5" fill="#f5a623" transform="rotate(130)"/>
+        </g>
+      </svg>
+      <div class="logo-txt">
+        <span class="logo-name">UNRaf</span>
+        <span class="logo-sub">Universidad Nacional de Rafaela</span>
+      </div>
+    </a>
+    <nav class="tabs">
+      <button class="tab on" data-t="cal" id="tCal">Calendario</button>
+      <button class="tab" data-t="add" id="tAdd">Registrar</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- CALENDAR VIEW -->
+  <section id="vCal">
+    <div class="wrap">
+      <div class="cal-hdr">
+        <div class="cal-nav">
+          <button class="cal-btn" id="prevM" aria-label="Mes anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="cal-btn" id="nextM" aria-label="Mes siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg></button>
+        </div>
+        <span class="cal-title" id="calTitle"></span>
+        <button class="cal-btn" id="todayBtn" aria-label="Ir a hoy" style="font-size:.72rem;font-weight:600;width:auto;padding:0 .6rem">Hoy</button>
+      </div>
+      <div class="filter-row" id="filters"></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </section>
+
+  <!-- FORM VIEW -->
+  <section id="vAdd" hidden>
+    <div class="wrap form-sec">
+      <h2>Registrar nuevo evento</h2>
+      <form id="evForm" class="fg" novalidate>
+        <div class="full">
+          <label for="fName">Nombre del evento</label>
+          <input type="text" id="fName" required placeholder="Ej: Jornadas de Ingeniería 2026">
+        </div>
+        <div>
+          <label for="fDate">Fecha</label>
+          <input type="date" id="fDate" required>
+        </div>
+        <div>
+          <label for="fTime">Hora</label>
+          <input type="time" id="fTime" required>
+        </div>
+        <div>
+          <label for="fLoc">Lugar</label>
+          <input type="text" id="fLoc" required placeholder="Ej: Aula Magna">
+        </div>
+        <div>
+          <label for="fCat">Categoría</label>
+          <select id="fCat" required>
+            <option value="">Seleccionar...</option>
+            <option value="Deportes">Deportes</option>
+            <option value="Académico">Académico</option>
+            <option value="Culturas">Culturas</option>
+          </select>
+        </div>
+        <div class="full">
+          <label for="fImg">URL de imagen (opcional)</label>
+          <input type="url" id="fImg" placeholder="https://ejemplo.com/imagen.jpg">
+          <p class="hint">Pegá la dirección web de una imagen representativa del evento</p>
+        </div>
+        <div class="full">
+          <label for="fDesc">Descripción</label>
+          <textarea id="fDesc" placeholder="Descripción breve del evento"></textarea>
+        </div>
+        <div class="full">
+          <label for="fOrg">Organizador</label>
+          <input type="text" id="fOrg" placeholder="Ej: Secretaría de Extensión">
+        </div>
+        <div class="full" style="margin-top:.5rem">
+          <button type="submit" class="btn-p">Guardar evento</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<footer class="ftr">
+  <div class="wrap">
+    UNRaf &middot; Universidad Nacional de Rafaela &middot; Rafaela, Santa Fe, Argentina<br>
+    <a href="https://www.unraf.edu.ar" target="_blank" rel="noopener">www.unraf.edu.ar</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+  var K='unraf_ev2',ev=[],filt='Todos';
+  var CATS=['Todos','Deportes','Académico','Culturas'];
+  var DOT_CLS={Deportes:'dot-deportes','Académico':'dot-academico',Culturas:'dot-culturas'};
+  var CAT_BG={Deportes:'background:rgba(0,167,157,.12);color:#00a79d','Académico':'background:rgba(27,58,107,.12);color:#1b3a6b',Culturas:'background:rgba(245,166,35,.15);color:#b87a00'};
+  var MES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  var curY,curM;
+  var now=new Date();
+  curY=now.getFullYear(); curM=now.getMonth();
+
+  function load(){try{ev=JSON.parse(localStorage.getItem(K))||[];}catch(e){ev=[];}if(!ev.length)seed();}
+  function save(){try{localStorage.setItem(K,JSON.stringify(ev));}catch(e){}}
+
+  function seed(){
+    ev=[
+      {id:1,name:'Media Maratón UNRaf 21K',date:'2026-11-15',time:'08:00',loc:'Campus Universitario',cat:'Deportes',desc:'Carrera abierta a la comunidad. Categorías 5K, 10K y 21K. Inscripción hasta el 10/11.',org:'Secretaría de Bienestar',img:''},
+      {id:2,name:'Torneo Interfacultades de Fútbol',date:'2026-11-22',time:'15:00',loc:'Campo deportivo',cat:'Deportes',desc:'Eliminatorias entre facultades. Equipos de 7 jugadores.',org:'Secretaría de Bienestar',img:''},
+      {id:3,name:'Jornadas de Ingeniería de Software',date:'2026-11-05',time:'09:00',loc:'Aula Magna — Sede Centro',cat:'Académico',desc:'Presentación de proyectos finales. Equipos de desarrollo muestran sus productos ante jurado.',org:'Dpto. de Tecnologías e Innovación',img:''},
+      {id:4,name:'Competencia UNRaf Start-Up 2026',date:'2026-11-20',time:'10:00',loc:'Incubadora UNRaf',cat:'Académico',desc:'Competencia de emprendimientos para estudiantes de todas las carreras.',org:'Secretaría de Investigación',img:''},
+      {id:5,name:'3° Jornada de Aportes Científico-Académicos',date:'2026-10-30',time:'14:00',loc:'Salón de Actos',cat:'Académico',desc:'Presentación de ponencias e investigaciones de docentes y estudiantes.',org:'Secretaría de Investigación',img:''},
+      {id:6,name:'Charla: IA y Sociedad',date:'2026-10-28',time:'18:30',loc:'Salón de Actos',cat:'Culturas',desc:'Debate abierto sobre el impacto de la inteligencia artificial en la vida cotidiana.',org:'Centro de Estudiantes',img:''},
+      {id:7,name:'Muestra de Arte Universitario',date:'2026-11-10',time:'17:00',loc:'Hall Central',cat:'Culturas',desc:'Exposición de obras de estudiantes de todas las carreras. Pintura, fotografía y escultura.',org:'Secretaría de Extensión',img:''}
+    ];
+    save();
+  }
+
+  // TABS
+  var tCal=document.getElementById('tCal'),tAdd=document.getElementById('tAdd');
+  var vCal=document.getElementById('vCal'),vAdd=document.getElementById('vAdd');
+  function showV(v){var c=v==='cal';tCal.classList.toggle('on',c);tAdd.classList.toggle('on',!c);vCal.hidden=!c;vAdd.hidden=c;if(c)render();}
+  tCal.onclick=function(){showV('cal');};
+  tAdd.onclick=function(){showV('add');};
+
+  // FILTERS
+  function renderFilters(){
+    var box=document.getElementById('filters');box.innerHTML='';
+    CATS.forEach(function(c){
+      var b=document.createElement('button');
+      b.className='chip'+(filt===c?' on':'');
+      b.textContent=c;
+      b.onclick=function(){filt=c;renderFilters();renderCal();};
+      box.appendChild(b);
+    });
+  }
+
+  // CALENDAR
+  function pad(n){return n<10?'0'+n:''+n;}
+  function renderCal(){
+    document.getElementById('calTitle').textContent=MES[curM]+' '+curY;
+    var g=document.getElementById('calGrid');
+    var html='';
+    DIAS.forEach(function(d){html+='<div class="cal-day-name">'+d+'</div>';});
+    var first=new Date(curY,curM,1).getDay();
+    var days=new Date(curY,curM+1,0).getDate();
+    var todayStr=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+
+    // empty cells
+    for(var i=0;i<first;i++) html+='<div class="cal-cell empty"></div>';
+
+    for(var d=1;d<=days;d++){
+      var ds=curY+'-'+pad(curM+1)+'-'+pad(d);
+      var isToday=ds===todayStr;
+      var dayEv=ev.filter(function(e){return e.date===ds&&(filt==='Todos'||e.cat===filt);});
+      html+='<div class="cal-cell'+(isToday?' today':'')+'">';
+      html+='<div class="cal-num">'+d+'</div>';
+      dayEv.forEach(function(e){
+        html+='<span class="cal-dot '+(DOT_CLS[e.cat]||'')+'" onclick="verEv('+e.id+')" title="'+esc(e.name)+'">'+esc(e.name)+'</span>';
+      });
+      html+='</div>';
+    }
+    // trailing empties
+    var total=first+days;
+    var rem=total%7;
+    if(rem>0) for(var i=0;i<7-rem;i++) html+='<div class="cal-cell empty"></div>';
+
+    g.innerHTML=html;
+  }
+
+  document.getElementById('prevM').onclick=function(){curM--;if(curM<0){curM=11;curY--;}renderCal();};
+  document.getElementById('nextM').onclick=function(){curM++;if(curM>11){curM=0;curY++;}renderCal();};
+  document.getElementById('todayBtn').onclick=function(){curY=now.getFullYear();curM=now.getMonth();renderCal();};
+
+  function render(){renderFilters();renderCal();}
+
+  // MODAL
+  var overlay=document.getElementById('overlay');
+  overlay.onclick=function(e){if(e.target===overlay)closeModal();};
+  function closeModal(){overlay.classList.remove('open');}
+
+  window.verEv=function(id){
+    var e=ev.find(function(x){return x.id===id;});
+    if(!e)return;
+    var catStyle=CAT_BG[e.cat]||'';
+    var imgHtml;
+    if(e.img){
+      imgHtml='<div class="modal-img"><img src="'+esc(e.img)+'" alt="'+esc(e.name)+'" onerror="this.parentElement.innerHTML=\'Imagen no disponible\'"></div>';
+    } else {
+      imgHtml='<div class="modal-img" style="display:flex;align-items:center;justify-content:center;background:var(--bg2);height:120px"><span style="color:var(--gris-claro);font-size:.8rem">Sin imagen</span></div>';
+    }
+    var dp=e.date.split('-');
+    var fecha=dp[2]+'/'+dp[1]+'/'+dp[0];
+    document.getElementById('modal').innerHTML=
+      '<button class="modal-close" onclick="closeM()" aria-label="Cerrar">&times;</button>'+
+      imgHtml+
+      '<div class="modal-body">'+
+        '<h3>'+esc(e.name)+'</h3>'+
+        '<div class="modal-meta">'+
+          '<span><strong>Fecha:</strong> '+fecha+'</span>'+
+          '<span><strong>Hora:</strong> '+e.time+' hs</span>'+
+          '<span><strong>Lugar:</strong> '+esc(e.loc)+'</span>'+
+          (e.org?'<span><strong>Organizador:</strong> '+esc(e.org)+'</span>':'')+
+        '</div>'+
+        (e.desc?'<p class="modal-desc">'+esc(e.desc)+'</p>':'')+
+        '<span class="modal-cat" style="'+catStyle+'">'+esc(e.cat)+'</span>'+
+        '<div class="modal-actions">'+
+          '<button class="btn-sm btn-danger" onclick="delEv('+e.id+')">Eliminar evento</button>'+
+        '</div>'+
+      '</div>';
+    overlay.classList.add('open');
+  };
+  window.closeM=closeModal;
+
+  window.delEv=function(id){
+    ev=ev.filter(function(x){return x.id!==id;});
+    save();closeModal();renderCal();toast('Evento eliminado');
+  };
+
+  // FORM
+  document.getElementById('evForm').onsubmit=function(e){
+    e.preventDefault();
+    var o={
+      id:Date.now(),
+      name:document.getElementById('fName').value.trim(),
+      date:document.getElementById('fDate').value,
+      time:document.getElementById('fTime').value,
+      loc:document.getElementById('fLoc').value.trim(),
+      cat:document.getElementById('fCat').value,
+      img:document.getElementById('fImg').value.trim(),
+      desc:document.getElementById('fDesc').value.trim(),
+      org:document.getElementById('fOrg').value.trim()
+    };
+    ev.push(o);save();this.reset();
+    // navigate to event month
+    var p=o.date.split('-');curY=parseInt(p[0]);curM=parseInt(p[1])-1;
+    showV('cal');toast('Evento registrado');
+  };
+
+  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+  // INIT
+  load();render();
+})();
+</script>
+</body>
+</html>
